@@ -1,0 +1,88 @@
+def count_occurrences(main_string, strings):
+    counts = []
+    for s in strings:
+        count = s.count(main_string)
+        counts.append(count)
+    return counts
+
+main_string = input("Введите основную строку: ")
+n = int(input("Введите количество строк для проверки: "))
+strings = [input(f"Введите строку {i + 1}: ") for i in range(n)]
+
+counts = count_occurrences(main_string, strings)
+for i, count in enumerate(counts):
+    print(f"Количество вхождений в строке {i + 1}: {count}")
+import math
+def calculate_shannon_entropy(s):
+    if not s:
+        return 0.0
+    entropy = 0.0
+    length = len(s)
+    freq = {}
+    for char in s:
+        if char in freq:
+            freq[char] += 1
+        else:
+            freq[char] = 1
+    for count in freq.values():
+        probability = count / length
+        entropy -= probability * math.log2(probability)
+    return entropy
+
+s = input("Введите строку: ")
+entropy = calculate_shannon_entropy(s)
+print(f"Энтропия по Шеннону: {entropy:.2f}")
+def process_sensor_data(data, sort_by):
+    sensors = {}
+    for entry in data.split():
+        sensor_id, temperature = entry.split('@')
+        sensor_id = int(sensor_id)
+        temperature = float(temperature)
+        if sensor_id in sensors:
+            sensors[sensor_id].append(temperature)
+        else:
+            sensors[sensor_id] = [temperature]
+
+    averages = []
+    for sensor_id, temps in sensors.items():
+        avg_temp = sum(temps) / len(temps)
+        averages.append((sensor_id, avg_temp))
+
+    if sort_by == 'id':
+        averages.sort(key=lambda x: x[0])
+    elif sort_by == 'temperature':
+        averages.sort(key=lambda x: x[1])
+
+    return averages
+
+data = input("Введите строку показаний датчиков: ")
+sort_by = input("Выберите поле сортировки (id/temperature): ").strip().lower()
+
+averages = process_sensor_data(data, sort_by)
+for sensor_id, avg_temp in averages:
+    print(f"{sensor_id} {avg_temp:.1f}")
+import re
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+email = input("Введите адрес электронной почты: ")
+if is_valid_email(email):
+    print("Адрес электронной почты корректен.")
+else:
+    print("Адрес электронной почты некорректен.")
+import re
+def is_valid_ipv6(ipv6):
+    pattern = r'^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
+    return re.match(pattern, ipv6) is not None
+ipv6 = input("Введите IPv6-адрес: ")
+if is_valid_ipv6(ipv6):
+    print("IPv6-адрес корректен.")
+else:
+    print("IPv6-адрес некорректен.")
+import re
+def replace_repeating_chars(s):
+    pattern = r'(.)\1{2,}'
+    return re.sub(pattern, r'\1', s)
+s = input("Введите строку: ")
+result = replace_repeating_chars(s)
+print(f"Результат: {result}")
