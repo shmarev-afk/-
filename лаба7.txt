@@ -1,0 +1,87 @@
+def most_frequent_char(s):
+    frequency = {}
+    for char in s:
+        if char in frequency:
+            frequency[char] += 1
+        else:
+            frequency[char] = 1
+    max_char = None
+    max_count = 0
+    for char, count in frequency.items():
+        if count > max_count:
+            max_count = count
+            max_char = char
+    return [max_char, max_count]
+def main():
+    input_str = input("Введите строку: ")
+    result = most_frequent_char(input_str)
+    print("Самый часто встречающийся символ и количество его повторов:", result)
+if __name__ == "__main__":
+    main()
+from datetime import datetime
+class Customer:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+class Product:
+    def __init__(self, name, price):
+        self.name = name
+        self.price = price
+class Order:
+    def __init__(self, customer, products, order_date):
+        self.customer = customer
+        self.products = products
+        self.order_date = order_date
+def calculate_total_orders_february_2020(orders):
+    total = 0.0
+    for order in orders:
+        if order.order_date.year == 2020 and order.order_date.month == 2:
+            for product in order.products:
+                total += product.price
+    return total
+def main():
+    # Пример данных
+    customer1 = Customer("John Doe", "john.doe@example.com")
+    customer2 = Customer("Jane Smith", "jane.smith@example.com")
+    product1 = Product("Laptop", 999.99)
+    product2 = Product("Mouse", 19.99)
+    product3 = Product("Keyboard", 49.99)
+    order1 = Order(customer1, [product1, product2], datetime(2020, 2, 15))
+    order2 = Order(customer2, [product3], datetime(2020, 2, 20))
+    order3 = Order(customer1, [product1, product3], datetime(2020, 3, 5))
+    orders = [order1, order2, order3]
+    total = calculate_total_orders_february_2020(orders)
+    print("Общая сумма заказов в феврале 2020 года:", total)
+if __name__ == "__main__":
+    main()
+import os
+def search_files(directory, search_str):
+    results = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            # Проверка названия файла
+            if search_str.lower() in file.lower():
+                results.append(file_path)
+            # Проверка содержимого файла (только для текстовых файлов)
+            if file.endswith('.txt'):
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        if search_str.lower() in content.lower():
+                            results.append(file_path)
+                except (IOError, UnicodeDecodeError):
+                    continue
+    return results
+def main():
+    directory = input("Введите путь к директории: ")
+    search_str = input("Введите строку для поиска: ")
+    results = search_files(directory, search_str)
+    if results:
+        print("Найденные файлы:")
+        for result in results:
+            print(result)
+    else:
+        print("Файлы не найдены.")
+if __name__ == "__main__":
+    main()
