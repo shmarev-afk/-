@@ -1,0 +1,281 @@
+import sys
+import math
+import os
+
+# --- Работа с файлами ---
+# Задание 1.1: Вывод содержимого файла с обработкой ошибок
+def display_file_content(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            content = f.read()
+            print("--- Содержимое файла ---")
+            print(content)
+            print("--- Конец содержимого ---")
+    except FileNotFoundError:
+        print(f"Ошибка: Файл '{filename}' не найден.")
+    except IOError:
+        print(f"Ошибка: Не удалось прочитать файл '{filename}'.")
+    except Exception as e:
+        print(f"Произошла непредвиденная ошибка при чтении файла: {e}")
+
+# Задание 1.2: Расчет энтропии по Шеннону из файла с обработкой ошибок
+def calculate_shannon_entropy_from_file(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            content = f.read()
+            if not content:
+                print(f"Ошибка: Файл '{filename}' пуст.")
+                return None
+
+            length = len(content)
+            freq = {}
+            for char in content:
+                if char in freq:
+                    freq[char] += 1
+                else:
+                    freq[char] = 1
+
+            entropy = 0.0
+            for count in freq.values():
+                probability = count / length
+                entropy -= probability * math.log2(probability)
+
+            print(f"Энтропия по Шеннону для файла '{filename}': {entropy:.2f}")
+            return entropy
+    except FileNotFoundError:
+        print(f"Ошибка: Файл '{filename}' не найден.")
+    except IOError:
+        print(f"Ошибка: Не удалось прочитать файл '{filename}'.")
+    except Exception as e:
+        print(f"Произошла непредвиденная ошибка при расчете энтропии: {e}")
+    return None
+
+# Задание 1.3: Расчет энтропии и запись в файл (для больших файлов)
+class CustomEntropyError(Exception):
+    """Базовый класс для ошибок, связанных с расчетом энтропии."""
+    pass
+
+class EmptyFileError(CustomEntropyError):
+    """Исключение, возникающее, если файл пуст."""
+    def __init__(self, filename):
+        self.filename = filename
+        super().__init__(f"Файл '{filename}' пуст, невозможно рассчитать энтропию.")
+
+class InvalidCharacterError(CustomEntropyError):
+    """Исключение, возникающее при встрече недопустимого символа (если требуется)."""
+    def __init__(self, char, filename):
+        self.char = char
+        self.filename = filename
+        super().__init__(f"В файле '{filename}' обнаружен недопустимый символ: '{char}'.")
+
+class FileProcessingError(CustomEntropyError):
+    """Исключение, возникающее при общих ошибках чтения файла."""
+    def __init__(self, filename, original_error):
+        self.filename = filename
+        self.original_error = original_error
+        super().__init__(f"Ошибка обработки файла '{filename}': {original_error}")
+
+def calculate_and_save_entropy(input_filename, output_filename):
+    total_length = 0
+    freq = {}
+    entropy = 0.0
+    try:
+        with open(input_filename, 'r', encoding='utf-8') as infile:
+            for line in infile:
+                total_length += len(line)
+                for char in line:
+                    if char in freq:
+                        freq[char] += 1
+                    else:
+                        freq[char] = 1
+
+        if total_length == 0:
+            raise EmptyFileError(input_filename)
+
+        for count in freq.values():
+            probability = count / total_length
+            entropy -= probability * math.log2(probability)
+
+        print(f"Рассчитанная энтропия: {entropy:.2f}")
+
+        with open(output_filename, 'w', encoding='utf-8') as outfile:
+            outfile.write(f"{entropy:.2f}")
+        print(f"Результат записан в файл '{output_filename}'.")
+
+    except FileNotFoundError:
+        print(f"Ошибка: Входной файл '{input_filename}' не найден.")
+    except IOError as e:
+        raise FileProcessingError(input_filename, e)
+    except EmptyFileError as e:
+        print(f"Ошибка: {e}")
+    except Exception as e:
+        raise FileProcessingError(input_filename, e)
+
+# --- Преобразования типов ---
+# Задание 2.1: Калькулятор перевода из одного типа данных в другой
+def convert_type(value_str, target_type):
+    try:
+        if target_type.lower() == 'int':
+            return int(value_str)
+        elif target_type.lower() == 'float':
+            return float(value_str)
+        elif target_type.lower() == 'string':
+            return str(value_str)
+        elif target_type.lower() == 'bool':
+            return value_str.lower() in ['true', '1', 'yes', 'y']
+        else:
+            return f"Ошибка: Неизвестный целевой тип '{target_type}'. Доступны: int, float, string, bool."
+    except ValueError:
+        return f"Ошибка: Невозможно преобразовать '{value_str}' в {target_type}. Некорректный формат."
+    except Exception as e:
+        return f"Произошла непредвиденная ошибка при преобразовании: {e}"
+
+# --- Исключения (exceptions) ---
+# Задание 3.1: Одно собственное исключение
+class CustomErrorOne(Exception):
+    """Первое собственное исключение."""
+    def __init__(self, message="Произошла пользовательская ошибка №1."):
+        self.message = message
+        super().__init__(self.message)
+
+def use_custom_error_one():
+    try:
+        raise CustomErrorOne("Необходимость активации первого пользовательского исключения.")
+    except CustomErrorOne as e:
+        print(f"Поймано собственное исключение №1: {e}")
+    except Exception as e:
+        print(f"Поймана другая ошибка: {e}")
+
+# Задание 3.2: Два собственных исключения
+class CustomErrorTwoA(Exception):
+    """Второе собственное исключение (вариант А)."""
+    def __init__(self, message="Произошла пользовательская ошибка №2А."):
+        self.message = message
+        super().__init__(self.message)
+
+class CustomErrorTwoB(Exception):
+    """Второе собственное исключение (вариант Б)."""
+    def __init__(self, message="Произошла пользовательская ошибка №2Б."):
+        self.message = message
+        super().__init__(self.message)
+
+def use_custom_errors_two():
+    try:
+        scenario = input("Выберите сценарий для исключений №2 (a/b): ")
+        if scenario == 'a':
+            raise CustomErrorTwoA("Сценарий А активирован.")
+        elif scenario == 'b':
+            raise CustomErrorTwoB("Сценарий Б активирован.")
+        else:
+            print("Некорректный сценарий.")
+    except CustomErrorTwoA as e:
+        print(f"Поймано собственное исключение №2А: {e}")
+    except CustomErrorTwoB as e:
+        print(f"Поймано собственное исключение №2Б: {e}")
+    except Exception as e:
+        print(f"Поймана другая ошибка: {e}")
+
+# Задание 3.3: Три собственных исключения
+class CustomErrorThreeA(Exception):
+    """Третье собственное исключение (вариант А)."""
+    def __init__(self, message="Произошла пользовательская ошибка №3А."):
+        self.message = message
+        super().__init__(self.message)
+
+class CustomErrorThreeB(Exception):
+    """Третье собственное исключение (вариант Б)."""
+    def __init__(self, message="Произошла пользовательская ошибка №3Б."):
+        self.message = message
+        super().__init__(self.message)
+
+class CustomErrorThreeC(Exception):
+    """Третье собственное исключение (вариант В)."""
+    def __init__(self, message="Произошла пользовательская ошибка №3В."):
+        self.message = message
+        super().__init__(self.message)
+
+def use_custom_errors_three():
+    try:
+        scenario = input("Выберите сценарий для исключений №3 (a/b/c): ")
+        if scenario == 'a':
+            raise CustomErrorThreeA("Сценарий 3А активирован.")
+        elif scenario == 'b':
+            raise CustomErrorThreeB("Сценарий 3Б активирован.")
+        elif scenario == 'c':
+            raise CustomErrorThreeC("Сценарий 3В активирован.")
+        else:
+            print("Некорректный сценарий.")
+    except CustomErrorThreeA as e:
+        print(f"Поймано собственное исключение №3А: {e}")
+    except CustomErrorThreeB as e:
+        print(f"Поймано собственное исключение №3Б: {e}")
+    except CustomErrorThreeC as e:
+        print(f"Поймано собственное исключение №3В: {e}")
+    except Exception as e:
+        print(f"Поймана другая ошибка: {e}")
+
+if __name__ == "__main__":
+    print("--- Задание 1: Работа с файлами ---")
+
+    # 1.1 Вывод содержимого файла
+    # Создадим временный файл для примера
+    try:
+        with open("example.txt", "w", encoding='utf-8') as f:
+            f.write("Это первая строка.\n")
+            f.write("Это вторая строка с некоторыми данными.\n")
+            f.write("Пример текста для демонстрации.\n")
+        print("\n1.1 Демонстрация вывода содержимого файла:")
+        display_file_content("example.txt")
+        display_file_content("non_existent_file.txt") # Пример несуществующего файла
+    except IOError:
+        print("Не удалось создать временный файл example.txt для демонстрации.")
+
+    # 1.2 Расчет энтропии из файла
+    print("\n1.2 Демонстрация расчета энтропии из файла:")
+    calculate_shannon_entropy_from_file("example.txt")
+    calculate_shannon_entropy_from_file("non_existent_file.txt")
+
+    # 1.3 Расчет энтропии и запись в файл
+    print("\n1.3 Демонстрация расчета энтропии и записи в файл:")
+    try:
+        with open("empty_file.txt", "w", encoding='utf-8') as f:
+            pass
+        calculate_and_save_entropy("example.txt", "entropy_results.txt")
+        calculate_and_save_entropy("empty_file.txt", "entropy_results_empty.txt") # Демонстрация EmptyFileError
+        calculate_and_save_entropy("non_existent_file.txt", "entropy_results_nonexistent.txt") # Демонстрация FileNotFoundError
+    except IOError:
+        print("Не удалось создать временные файлы для демонстрации 1.3.")
+
+    print("\n--- Задание 2: Преобразования типов ---")
+
+    # 2.1 Калькулятор перевода
+    print("\n2.1 Демонстрация калькулятора перевода:")
+    while True:
+        value_to_convert = input("Введите значение для преобразования (или 'exit' для выхода): ")
+        if value_to_convert.lower() == 'exit':
+            break
+        target_type = input("Введите целевой тип (int, float, string, bool): ")
+        converted_value = convert_type(value_to_convert, target_type)
+        print(f"Результат преобразования: {converted_value} (тип: {type(converted_value).__name__})")
+        print("-" * 20)
+
+    print("\n--- Задание 3: Исключения (exceptions) ---")
+
+    # 3.1 Одно собственное исключение
+    print("\n3.1 Демонстрация одного собственного исключения:")
+    use_custom_error_one()
+
+    # 3.2 Два собственных исключения
+    print("\n3.2 Демонстрация двух собственных исключений:")
+    use_custom_errors_two()
+
+    # 3.3 Три собственных исключения
+    print("\n3.3 Демонстрация трех собственных исключений:")
+    use_custom_errors_three()
+
+    try:
+        os.remove("example.txt")
+        os.remove("empty_file.txt")
+        os.remove("entropy_results.txt")
+    except OSError:
+        pass
