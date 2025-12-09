@@ -1,0 +1,215 @@
+def perms(nums):
+    if len(nums) <= 1:
+        return [nums]
+    result = []
+    for i in range(len(nums)):
+        current = nums[i]
+        remaining = nums[:i] + nums[i+1:]
+        for p in perms(remaining):
+            result.append([current] + p)
+    return result
+numbers = list(map(int, input("Введите числа через запятую: ").split(',')))
+permutations = perms(numbers)
+print("Все возможные перестановки:")
+for p in permutations:
+    print(p)
+def maxProfit(prices):
+    if not prices:
+        return 0
+    min_price = prices[0]
+    max_profit = 0
+    for price in prices[1:]:
+        if price < min_price:
+            min_price = price
+        else:
+            current_profit = price - min_price
+            if current_profit > max_profit:
+                max_profit = current_profit
+    return max_profit
+prices = list(map(int, input("Введите цены акций через запятую: ").split(',')))
+profit = maxProfit(prices)
+print(f"Максимальная прибыль: {profit}")
+def maxArea(heights):
+    left = 0
+    right = len(heights) - 1
+    max_area = 0
+    while left < right:
+        width = right - left
+        height = min(heights[left], heights[right])
+        current_area = width * height
+        max_area = max(max_area, current_area)
+        if heights[left] < heights[right]:
+            left += 1
+        else:
+            right -= 1
+    return max_area
+heights = list(map(int, input("Введите высоты линий через запятую: ").split(',')))
+area = maxArea(heights)
+print(f"Максимальный объем воды: {area}")
+def create_latin_to_english_dictionary(english_to_latin):
+    latin_to_english = {}
+    for entry in english_to_latin:
+        parts = entry.split(' - ')
+        english_word = parts[0]
+        latin_words = parts[1].split(', ')
+        for latin_word in latin_words:
+            if latin_word not in latin_to_english:
+                latin_to_english[latin_word] = []
+            latin_to_english[latin_word].append(english_word)
+    # Сортируем латинские слова и английские переводы
+    sorted_latin_words = sorted(latin_to_english.keys())
+    for latin_word in sorted_latin_words:
+        latin_to_english[latin_word].sort()
+    return latin_to_english
+def main():
+    N = int(input("Введите количество английских слов: "))
+    english_to_latin = []
+    for _ in range(N):
+        entry = input("Введите английское слово и его переводы: ")
+        english_to_latin.append(entry)
+    latin_to_english = create_latin_to_english_dictionary(english_to_latin)
+    print("\nЛатинско-английский словарь:")
+    for latin_word, english_words in latin_to_english.items():
+        print(f"{latin_word} - {', '.join(english_words)}")
+if __name__ == "__main__":
+    main()
+def analyze_sales(data):
+    sales = {}
+    for entry in data:
+        customer, product, quantity = entry.split()
+        quantity = int(quantity)
+        if customer not in sales:
+            sales[customer] = {}
+        if product not in sales[customer]:
+            sales[customer][product] = 0
+        sales[customer][product] += quantity
+    # Сортируем покупателей и товары
+    sorted_customers = sorted(sales.keys())
+    for customer in sorted_customers:
+        sorted_products = sorted(sales[customer].keys())
+        for product in sorted_products:
+            print(f"{customer} {product} {sales[customer][product]}")
+def main():
+    data = []
+    print("Введите данные о продажах (Покупатель товар количество). Для завершения введите 'exit':")
+    while True:
+        entry = input()
+        if entry.lower() == 'exit':
+            break
+        data.append(entry)
+    print("\nРезультаты анализа:")
+    analyze_sales(data)
+if __name__ == "__main__":
+    main()
+import time
+import matplotlib.pyplot as plt
+# Классическая реализация
+def fibonacci_classic(n):
+    if n <= 1:
+        return n
+    else:
+        return fibonacci_classic(n-1) + fibonacci_classic(n-2)
+# Оптимизированная реализация с кешированием
+def fibonacci_optimized(n, memo={}):
+    if n <= 1:
+        return n
+    if n not in memo:
+        memo[n] = fibonacci_optimized(n-1, memo) + fibonacci_optimized(n-2, memo)
+    return memo[n]
+def measure_time(func, n):
+    start_time = time.time()
+    result = func(n)
+    end_time = time.time()
+    return end_time - start_time, result
+def main():
+    n = int(input("Введите номер числа Фибоначчи: "))
+    # Классическая реализация
+    time_classic, result_classic = measure_time(fibonacci_classic, n)
+    print(f"Классическая реализация: {result_classic} (время: {time_classic:.6f} секунд)")
+    # Оптимизированная реализация
+    time_optimized, result_optimized = measure_time(fibonacci_optimized, n)
+    print(f"Оптимизированная реализация: {result_optimized} (время: {time_optimized:.6f} секунд)")
+    # Сравнение временной сложности
+    print("\nСравнение временной сложности:")
+    print("Классическая реализация: O(2^n)")
+    print("Оптимизированная реализация: O(n)")
+    # Построение графиков
+    n_values = list(range(1, n+1))
+    times_classic = []
+    times_optimized = []
+    for i in n_values:
+        time_classic, _ = measure_time(fibonacci_classic, i)
+        time_optimized, _ = measure_time(fibonacci_optimized, i)
+        times_classic.append(time_classic)
+        times_optimized.append(time_optimized)
+    plt.figure(figsize=(10, 6))
+    plt.plot(n_values, times_classic, label='Классическая реализация')
+    plt.plot(n_values, times_optimized, label='Оптимизированная реализация')
+    plt.xlabel('Номер числа Фибоначчи')
+    plt.ylabel('Время выполнения (секунды)')
+    plt.title('Сравнение времени выполнения')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+if __name__ == "__main__":
+    main()
+def remove_duplicates(arr):
+    unique_elements = set(arr)
+    return list(unique_elements)
+def main():
+    input_str = input("Введите массив чисел через запятую: ")
+    arr = list(map(int, input_str.split(',')))
+    unique_arr = remove_duplicates(arr)
+    print("Массив без дубликатов:", unique_arr)
+if __name__ == "__main__":
+    main()
+def analyze_languages(students):
+    all_languages = set()
+    common_languages = None
+    for languages in students:
+        current_languages = set(languages)
+        all_languages.update(current_languages)
+        if common_languages is None:
+            common_languages = current_languages
+        else:
+            common_languages.intersection_update(current_languages)
+    common_languages = sorted(common_languages)
+    all_languages = sorted(all_languages)
+    print(len(common_languages))
+    for lang in common_languages:
+        print(lang)
+    print(len(all_languages))
+    for lang in all_languages:
+        print(lang)
+def main():
+    num_students = int(input("Введите количество школьников: "))
+    students = []
+    for _ in range(num_students):
+        num_languages = int(input("Введите количество языков, которое знает школьник: "))
+        languages = []
+        for _ in range(num_languages):
+            language = input("Введите язык: ")
+            languages.append(language)
+        students.append(languages)
+    analyze_languages(students)
+if __name__ == "__main__":
+    main()
+def isValid(s):
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in mapping:
+            top_element = stack.pop() if stack else '#'
+            if mapping[char] != top_element:
+                return False
+        else:
+            stack.append(char)
+    return not stack
+def main():
+    input_str = input("Введите строку со скобками: ")
+    if isValid(input_str):
+        print("Строка валидна.")
+    else:
+        print("Строка невалидна.")
+if __name__ == "__main__":
+    main()
