@@ -1,0 +1,221 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+class PrimeChecker extends RecursiveTask<List<Integer>> {
+    private static final Logger logger = Logger.getLogger(PrimeChecker.class.getName());
+    private final int start;
+    private final int end;
+    private final int threshold;
+
+    public PrimeChecker(int start, int end, int threshold) {
+        this.start = start;
+        this.end = end;
+        this.threshold = threshold;
+    }
+
+    @Override
+    protected List<Integer> compute() {
+        List<Integer> primes = new ArrayList<>();
+        if (end - start <= threshold) {
+            for (int i = start; i <= end; i++) {
+                if (isPrime(i)) {
+                    primes.add(i);
+                }
+            }
+            return primes;
+        } else {
+            int mid = (start + end) / 2;
+            PrimeChecker leftTask = new PrimeChecker(start, mid, threshold);
+            PrimeChecker rightTask = new PrimeChecker(mid + 1, end, threshold);
+            leftTask.fork();
+            rightTask.fork();
+            primes.addAll(leftTask.join());
+            primes.addAll(rightTask.join());
+            return primes;
+        }
+    }
+
+    private boolean isPrime(int n) {
+        if (n <= 1) {
+            return false;
+        }
+        if (n == 2 || n == 3) {
+            return true;
+        }
+        if (n % 2 == 0 || n % 3 == 0) {
+            return false;
+        }
+        for (int i = 5; i * i <= n; i = i + 6) {
+            if (n % i == 0 || n % (i + 2) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+public class PrimeNumberCalculator {
+    private static final Logger logger = Logger.getLogger(PrimeNumberCalculator.class.getName());
+
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            logger.log(Level.SEVERE, "Usage: java PrimeNumberCalculator <start> <end>");
+            return;
+        }
+
+        int start = Integer.parseInt(args[0]);
+        int end = Integer.parseInt(args[1]);
+        int threshold = 1000; // Порог для последовательной обработки
+
+        ForkJoinPool pool = new ForkJoinPool();
+        PrimeChecker task = new PrimeChecker(start, end, threshold);
+
+        long startTime = System.currentTimeMillis();
+        List<Integer> primes = pool.invoke(task);
+        long endTime = System.currentTimeMillis();
+
+        logger.log(Level.INFO, "Found " + primes.size() + " primes between " + start + " and " + end);
+        logger.log(Level.INFO, "Time taken with Work Stealing: " + (endTime - startTime) + " ms");
+
+        // Сравнение с равномерным распределением
+        startTime = System.currentTimeMillis();
+        List<Integer> primesUniform = new ArrayList<>();
+        for (int i = start; i <= end; i++) {
+            if (isPrime(i)) {
+                primesUniform.add(i);
+            }
+        }
+        endTime = System.currentTimeMillis();
+
+        logger.log(Level.INFO, "Time taken with uniform distribution: " + (endTime - startTime) + " ms");
+    }
+
+    private static boolean isPrime(int n) {
+        if (n <= 1) {
+            return false;
+        }
+        if (n == 2 || n == 3) {
+            return true;
+        }
+        if (n % 2 == 0 || n % 3 == 0) {
+            return false;
+        }
+        for (int i = 5; i * i <= n; i = i + 6) {
+            if (n % i == 0 || n % (i + 2) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+class DataProcessor implements Callable<Map<String, Map<Integer, Double>>> {
+    private static final Logger logger = Logger.getLogger(DataProcessor.class.getName());
+    private final List<String> lines;
+    private final int start;
+    private final int end;
+
+    public DataProcessor(List<String> lines, int start, int end) {
+        this.lines = lines;
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    public Map<String, Map<Integer, Double>> call() {
+        Map<String, Map<Integer, Double>> cityYearMaxPrice = new HashMap<>();
+        for (int i = start; i < end; i++) {
+            String line = lines.get(i);
+            String[] parts = line.split(",");
+            if (parts.length < 3) {
+                continue;
+            }
+            String date = parts[0];
+            String city = parts[1];
+            double price = Double.parseDouble(parts[2]);
+            int year = Integer.parseInt(date.split("-")[0]);
+
+            cityYearMaxPrice.computeIfAbsent(city, k -> new HashMap<>());
+            cityYearMaxPrice.get(city).merge(year, price, Double::max);
+        }
+        return cityYearMaxPrice;
+    }
+}
+
+public class HousePriceAnalyzer {
+    private static final Logger logger = Logger.getLogger(HousePriceAnalyzer.class.getName());
+
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            logger.log(Level.SEVERE, "Usage: java HousePriceAnalyzer <file_path>");
+            return;
+        }
+
+        String filePath = args[0];
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error reading file", e);
+            return;
+        }
+
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        List<Future<Map<String, Map<Integer, Double>>>> futures = new ArrayList<>();
+        int chunkSize = lines.size() / numThreads;
+
+        for (int i = 0; i < numThreads; i++) {
+            int start = i * chunkSize;
+            int end = (i == numThreads - 1) ? lines.size() : (i + 1) * chunkSize;
+            futures.add(executor.submit(new DataProcessor(lines, start, end)));
+        }
+
+        Map<String, Map<Integer, Double>> cityYearMaxPrice = new HashMap<>();
+        for (Future<Map<String, Map<Integer, Double>>> future : futures) {
+            try {
+                Map<String, Map<Integer, Double>> result = future.get();
+                for (Map.Entry<String, Map<Integer, Double>> entry : result.entrySet()) {
+                    String city = entry.getKey();
+                    Map<Integer, Double> yearMaxPrice = entry.getValue();
+                    cityYearMaxPrice.computeIfAbsent(city, k -> new HashMap<>());
+                    for (Map.Entry<Integer, Double> yearEntry : yearMaxPrice.entrySet()) {
+                        int year = yearEntry.getKey();
+                        double price = yearEntry.getValue();
+                        cityYearMaxPrice.get(city).merge(year, price, Double::max);
+                    }
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.SEVERE, "Error processing data", e);
+            }
+        }
+
+        executor.shutdown();
+
+        // Построение гистограммы
+        for (Map.Entry<String, Map<Integer, Double>> entry : cityYearMaxPrice.entrySet()) {
+            String city = entry.getKey();
+            Map<Integer, Double> yearMaxPrice = entry.getValue();
+            logger.log(Level.INFO, "City: " + city);
+            for (Map.Entry<Integer, Double> yearEntry : yearMaxPrice.entrySet()) {
+                int year = yearEntry.getKey();
+                double price = yearEntry.getValue();
+                logger.log(Level.INFO, "Year: " + year + ", Max Price: " + price);
+            }
+        }
+    }
+}
