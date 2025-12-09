@@ -1,0 +1,264 @@
+class ExampleClass:
+    def __init__(self, name="", value=0):
+        self.__name = name
+        self.__value = value
+
+    def get_name(self):
+        return self.__name
+
+    def set_name(self, name):
+        self.__name = name
+
+    def get_value(self):
+        return self.__value
+
+    def set_value(self, value):
+        self.__value = value
+
+    def display(self):
+        return f"Name: {self.__name}, Value: {self.__value}"
+
+obj1 = ExampleClass()
+obj2 = ExampleClass("Ваня", 24)
+
+print(obj1.display())
+print(obj2.display())
+import math
+class Octagon:
+    def __init__(self, innerRadius=0):
+        self.__innerRadius = innerRadius
+
+    def set_innerRadius(self, radius):
+        self.__innerRadius = radius
+
+    def get_innerRadius(self):
+        return self.__innerRadius
+
+    def calculateArea(self):
+        return 8 * (self.__innerRadius ** 2) * math.tan(math.pi / 8)
+
+    def calculatePerimeter(self):
+        return 16 * self.__innerRadius * math.tan(math.pi / 8)
+
+octagon = Octagon(10)
+print(f"Площадь восьмиугольника: {octagon.calculateArea():.2f}")
+print(f"Периметр восьмиугольника: {octagon.calculatePerimeter():.2f}")
+from datetime import datetime, date
+class Student:
+    def __init__(self, name="", birthDate=None, group="", studentId=0, averageScore=0.0):
+        self.__name = name
+        self.__birthDate = birthDate
+        self.__group = group
+        self.__studentId = studentId
+        self.__averageScore = averageScore
+
+    def get_name(self):
+        return self.__name
+
+    def get_birthDate(self):
+        return self.__birthDate
+
+    def get_group(self):
+        return self.__group
+
+    def get_studentId(self):
+        return self.__studentId
+
+    def get_averageScore(self):
+        return self.__averageScore
+
+    def set_name(self, name):
+        self.__name = name
+
+    def set_birthDate(self, birthDate):
+        self.__birthDate = birthDate
+
+    def set_group(self, group):
+        self.__group = group
+
+    def set_studentId(self, studentId):
+        self.__studentId = studentId
+
+    def set_averageScore(self, averageScore):
+        self.__averageScore = averageScore
+
+    def getAge(self):
+        if self.__birthDate:
+            today = date.today()
+            age = today.year - self.__birthDate.year
+            if (today.month, today.day) < (self.__birthDate.month, self.__birthDate.day):
+                age -= 1
+            return age
+        return 0
+
+    def toString(self):
+        return (f"Студент: {self.__name}\n"
+                f"Дата рождения: {self.__birthDate}\n"
+                f"Группа: {self.__group}\n"
+                f"Номер студента: {self.__studentId}\n"
+                f"Средний балл: {self.__averageScore}\n"
+                f"Возраст: {self.getAge()}")
+
+    def isExcellentStudent(self):
+        return self.__averageScore >= 4.8
+
+student1 = Student(
+    "Пислов Дима",
+    date(2006, 5, 15),
+    "ИС24",
+    12345,
+    4.9
+)
+student2 = Student(
+    "Забрал Купин",
+    date(2005, 8, 22),
+    "ИБ23",
+    12346,
+    4.5
+)
+print(student1.toString())
+print(f"Отличник: {student1.isExcellentStudent()}")
+print("\n" + "=" * 50 + "\n")
+print(student2.toString())
+print(f"Отличник: {student2.isExcellentStudent()}")
+class BankAccount:
+    def __init__(self, accountNumber="", balance=0.0):
+        self.__accountNumber = accountNumber
+        self.__balance = balance
+
+    def get_accountNumber(self):
+        return self.__accountNumber
+
+    def set_accountNumber(self, accountNumber):
+        self.__accountNumber = accountNumber
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.__balance += amount
+            return True
+        return False
+
+    def withdraw(self, amount):
+        if 0 < amount <= self.__balance:
+            self.__balance -= amount
+            return True
+        return False
+
+    def getBalance(self):
+        return self.__balance
+
+account = BankAccount("123456789", 1000.0)
+print(f"Начальный баланс: {account.getBalance()}")
+account.deposit(500)
+print(f"После депозита 500: {account.getBalance()}")
+account.withdraw(300)
+print(f"После снятия 300: {account.getBalance()}")
+account.withdraw(2000)  # Недостаточно средств
+print(f"После попытки снятия 2000: {account.getBalance()}")
+class Author:
+    def __init__(self, name="", birthYear=0):
+        self.__name = name
+        self.__birthYear = birthYear
+
+    def get_name(self):
+        return self.__name
+
+    def set_name(self, name):
+        self.__name = name
+
+    def get_birthYear(self):
+        return self.__birthYear
+
+    def set_birthYear(self, birthYear):
+        self.__birthYear = birthYear
+
+    def display(self):
+        return f"Автор: {self.__name}, Год рождения: {self.__birthYear}"
+
+class Book:
+    def __init__(self, title="", author=None):
+        self.__title = title
+        self.__author = author
+
+    def get_title(self):
+        return self.__title
+
+    def set_title(self, title):
+        self.__title = title
+
+    def get_author(self):
+        return self.__author
+
+    def set_author(self, author):
+        self.__author = author
+
+    def display(self):
+        author_info = self.__author.display() if self.__author else "Автор не указан"
+        return f"Книга: {self.__title}\n{author_info}"
+
+author1 = Author("Лев Толстой", 1828)
+book1 = Book("Война и мир", author1)
+print(book1.display())
+class Engine:
+    def __init__(self, power=0):
+        self.__power = power
+
+    def get_power(self):
+        return self.__power
+
+    def set_power(self, power):
+        self.__power = power
+
+class Passenger:
+    def __init__(self, name=""):
+        self.__name = name
+
+    def get_name(self):
+        return self.__name
+
+    def set_name(self, name):
+        self.__name = name
+
+class Car:
+    def __init__(self, model="", engine=None):
+        self.__model = model
+        self.__engine = engine
+        self.__passengers = []
+
+    def addPassenger(self, passenger):
+        if passenger and len(self.__passengers) < 2:
+            self.__passengers.append(passenger)
+            return True
+        return False
+
+    def removePassenger(self, passenger):
+        if passenger in self.__passengers:
+            self.__passengers.remove(passenger)
+            return True
+        return False
+
+    def displayInfo(self):
+        engine_power = self.__engine.get_power() if self.__engine else 0
+        passenger_names = ", ".join(
+            [p.get_name() for p in self.__passengers]) if self.__passengers else "нет пассажиров"
+
+        info = f"Модель автомобиля: {self.__model}\n"
+        info += f"Мощность двигателя: {engine_power} л.с.\n"
+        info += f"Пассажиры: {passenger_names}\n"
+        info += f"Количество пассажиров: {len(self.__passengers)}"
+        return info
+
+if __name__ == "__main__":
+    # Создание двигателя
+    engine = Engine(150)
+    car = Car("Toyota Camry", engine)
+    passenger1 = Passenger("Иван")
+    passenger2 = Passenger("Мария")
+    passenger3 = Passenger("Алексей")
+    car.addPassenger(passenger1)
+    car.addPassenger(passenger2)
+    car.addPassenger(passenger3)
+    print(car.displayInfo())
+    car.removePassenger(passenger1)
+    print("\nПосле удаления пассажира:")
+    print(car.displayInfo())
