@@ -1,0 +1,93 @@
+import threading
+import math
+class TrapezoidAreaCalculator(threading.Thread):
+    def __init__(self, a, b, n, func):
+        threading.Thread.__init__(self)
+        self.a = a
+        self.b = b
+        self.n = n
+        self.func = func
+        self.result = 0.0
+    def run(self):
+        h = (self.b - self.a) / self.n
+        integral = 0.0
+        for i in range(self.n):
+            x = self.a + i * h
+            integral += self.func(x) * h
+        self.result = integral
+def calculate_trapezoid_area(a, b, n, func):
+    threads = []
+    num_threads = 4  # Количество потоков
+    step = (b - a) / num_threads
+    results = []
+    for i in range(num_threads):
+        start = a + i * step
+        end = start + step
+        thread = TrapezoidAreaCalculator(start, end, n // num_threads, func)
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+        results.append(thread.result)
+    total_area = sum(results)
+    return total_area
+def example_function(x):
+    return math.sin(x)  # Пример функции для криволинейной трапеции
+def main():
+    a = float(input("Введите нижний предел интегрирования (a): "))
+    b = float(input("Введите верхний предел интегрирования (b): "))
+    n = int(input("Введите количество разбиений (n): "))
+    area = calculate_trapezoid_area(a, b, n, example_function)
+    print(f"Площадь криволинейной трапеции: {area}")
+if __name__ == "__main__":
+    main()
+import threading
+import math
+import os
+class EntropyCalculator(threading.Thread):
+    def __init__(self, file_path, start, end):
+        threading.Thread.__init__(self)
+        self.file_path = file_path
+        self.start = start
+        self.end = end
+        self.freq = {}
+    def run(self):
+        with open(self.file_path, 'rb') as file:
+            file.seek(self.start)
+            chunk = file.read(self.end - self.start)
+            for byte in chunk:
+                if byte in self.freq:
+                    self.freq[byte] += 1
+                else:
+                    self.freq[byte] = 1
+def calculate_shannon_entropy(file_path):
+    file_size = os.path.getsize(file_path)
+    num_threads = 4  # Количество потоков
+    chunk_size = file_size // num_threads
+    threads = []
+    freq = {}
+    for i in range(num_threads):
+        start = i * chunk_size
+        end = (i + 1) * chunk_size if i < num_threads - 1 else file_size
+        thread = EntropyCalculator(file_path, start, end)
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+        for byte, count in thread.freq.items():
+            if byte in freq:
+                freq[byte] += count
+            else:
+                freq[byte] = count
+    entropy = 0.0
+    total_bytes = sum(freq.values())
+    for count in freq.values():
+        probability = count / total_bytes
+        entropy -= probability * math.log2(probability)
+    return entropy
+def main():
+    file_path = input("Введите путь к файлу: ")
+    entropy = calculate_shannon_entropy(file_path)
+    print(f"Энтропия по Шеннону: {entropy}")
+if __name__ == "__main__":
+    main()
